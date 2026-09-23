@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_sequence"
+        android:icon="@drawable/ic_nav_sequence"
+        android:title="整串听认" />
+    <item
+        android:id="@+id/nav_listen"
+        android:icon="@drawable/ic_nav_listen"
+        android:title="听音选字" />
+    <item
+        android:id="@+id/nav_tap"
+        android:icon="@drawable/ic_nav_tap"
+        android:title="选字听音" />
+</menu>

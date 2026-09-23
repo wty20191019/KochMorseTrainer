@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="16dp">
+
+        <!-- 字符数量（仅整串页有） -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="#1E1E1E"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="字符数量"
+                android:textColor="#CCCCCC" />
+
+            <SeekBar
+                android:id="@+id/seekBarLength"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:max="9"
+                android:progress="4" />
+
+            <TextView
+                android:id="@+id/tvLengthValue"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:text="5"
+                android:textColor="#FFFFFF"
+                android:gravity="center" />
+        </LinearLayout>
+
+        <!-- 公共设置区 -->
+        <include layout="@layout/view_audio_settings" />
+
+        <!-- 播放控制 -->
+        <Button
+            android:id="@+id/btnPlay"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="播放摩尔斯码"
+            android:layout_marginBottom="12dp" />
+
+        <!-- 答案显示 -->
+        <TextView
+            android:id="@+id/tvAnswer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="32sp"
+            android:textColor="#FFFFFF"
+            android:gravity="center"
+            android:background="#333333"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:minHeight="60dp" />
+
+        <!-- 候选按钮 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/btnChoice1"
+                android:layout_width="65dp"
+                android:layout_height="65dp"
+                android:text="K"
+                android:textSize="26sp"
+                android:layout_margin="6dp" />
+
+            <Button
+                android:id="@+id/btnChoice2"
+                android:layout_width="65dp"
+                android:layout_height="65dp"
+                android:text="M"
+                android:textSize="26sp"
+                android:layout_margin="6dp" />
+
+            <Button
+                android:id="@+id/btnChoice3"
+                android:layout_width="65dp"
+                android:layout_height="65dp"
+                android:text="U"
+                android:textSize="26sp"
+                android:layout_margin="6dp" />
+
+            <Button
+                android:id="@+id/btnChoice4"
+                android:layout_width="65dp"
+                android:layout_height="65dp"
+                android:text="R"
+                android:textSize="26sp"
+                android:layout_margin="6dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="12dp">
+
+            <Button
+                android:id="@+id/btnDelete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="← 删除"
+                android:layout_margin="6dp" />
+
+            <Button
+                android:id="@+id/btnSubmit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="提交答案"
+                android:enabled="false"
+                android:layout_margin="6dp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvResult"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="18sp"
+            android:textColor="#FF0000"
+            android:layout_marginBottom="16dp" />
+
+    </LinearLayout>
+</ScrollView>
