@@ -7,11 +7,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 
 /**
- * 单字·听音选字页：自动播放一个随机字符，用户从 4 个候选按钮中选出，
- * 显示对错后自动进入下一题。
+ * 单字·听音选字页：自动播放一个随机字符，用户从候选按钮中选出，
+ * 显示对错后自动进入下一题。候选数量由滑条控制。
  */
 class SingleListenFragment : BaseTrainerFragment() {
 
@@ -19,7 +20,7 @@ class SingleListenFragment : BaseTrainerFragment() {
 
     private lateinit var tvAnswer: TextView
     private lateinit var tvResult: TextView
-    private lateinit var choiceButtons: Array<Button>
+    private lateinit var choiceContainer: LinearLayout
     private var target = ""
     private var answering = false
     private val handler = Handler(Looper.getMainLooper())
@@ -36,16 +37,9 @@ class SingleListenFragment : BaseTrainerFragment() {
 
         tvAnswer = view.findViewById(R.id.tvAnswer)
         tvResult = view.findViewById(R.id.tvResult)
-        choiceButtons = arrayOf(
-            view.findViewById(R.id.btnChoice1),
-            view.findViewById(R.id.btnChoice2),
-            view.findViewById(R.id.btnChoice3),
-            view.findViewById(R.id.btnChoice4)
-        )
-        for (button in choiceButtons) {
-            button.setOnClickListener { onAnswer(button.text.firstOrNull()) }
-        }
+        choiceContainer = view.findViewById(R.id.choiceContainer)
         view.findViewById<Button>(R.id.btnReplay).setOnClickListener { replay() }
+        bindChoiceCount(view) { updateChoiceButtons() }
 
         startRound()
     }
@@ -78,24 +72,14 @@ class SingleListenFragment : BaseTrainerFragment() {
 
     private fun updateChoiceButtons() {
         val chars = koch.currentChars.toList()
-        if (chars.size <= 4) {
-            for (i in 0 until 4) {
-                if (i < chars.size) {
-                    choiceButtons[i].text = chars[i].toString()
-                    choiceButtons[i].isEnabled = true
-                } else {
-                    choiceButtons[i].text = "-"
-                    choiceButtons[i].isEnabled = false
-                }
-            }
+        val count = minOf(state.choiceCount, chars.size)
+        val labels = if (chars.size <= count) {
+            chars.map { it.toString() }
         } else {
-            val others = chars.filter { it != target[0] }.shuffled().take(3)
-            val options = (others + target[0]).shuffled()
-            choiceButtons.forEachIndexed { i, button ->
-                button.text = options[i].toString()
-                button.isEnabled = true
-            }
+            val others = chars.filter { it != target[0] }.shuffled().take(count - 1)
+            (others + target[0]).shuffled().map { it.toString() }
         }
+        renderChoiceButtons(choiceContainer, labels) { label -> onAnswer(label.firstOrNull()) }
     }
 
     private fun onAnswer(ch: Char?) {

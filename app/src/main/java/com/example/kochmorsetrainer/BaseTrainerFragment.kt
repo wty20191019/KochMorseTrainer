@@ -1,6 +1,9 @@
 package com.example.kochmorsetrainer
 
+import android.view.Gravity
 import android.view.View
+import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -108,6 +111,59 @@ abstract class BaseTrainerFragment : Fragment() {
             " " + koch.currentChars.toCharArray().joinToString(" ")
     }
 
+    /** 绑定“候选数量”滑条（仅整串/听音选字两页有该控件） */
+    protected fun bindChoiceCount(root: View, onChange: () -> Unit) {
+        val seek = root.findViewById<SeekBar>(R.id.seekBarChoices) ?: return
+        val tv = root.findViewById<TextView>(R.id.tvChoicesValue)
+        seek.max = MAX_CHOICES - MIN_CHOICES
+        seek.progress = (state.choiceCount - MIN_CHOICES).coerceAtLeast(0)
+        tv.text = state.choiceCount.toString()
+        seek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                state.choiceCount = progress + MIN_CHOICES
+                tv.text = state.choiceCount.toString()
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) = onChange()
+        })
+    }
+
+    /** 按候选文本动态生成候选按钮（每行最多 CHOICES_PER_ROW 个） */
+    protected fun renderChoiceButtons(
+        container: LinearLayout,
+        labels: List<String>,
+        onClick: (String) -> Unit
+    ) {
+        container.removeAllViews()
+        val buttonHeight = (65 * resources.displayMetrics.density).toInt()
+        var row: LinearLayout? = null
+
+        labels.forEachIndexed { index, label ->
+            if (index % CHOICES_PER_ROW == 0) {
+                row = LinearLayout(requireContext()).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    gravity = Gravity.CENTER
+                }
+                container.addView(row)
+            }
+
+            val button = Button(requireContext()).apply {
+                text = label
+                textSize = 26f
+                layoutParams = LinearLayout.LayoutParams(0, buttonHeight, 1f).apply {
+                    setMargins(6, 6, 6, 6)
+                }
+                setOnClickListener { onClick(label) }
+            }
+            row?.addView(button)
+        }
+    }
+
     /** 等级变化后子类刷新自己的内容（候选按钮 / 字符网格等） */
     protected abstract fun onLevelChanged()
 
@@ -120,5 +176,11 @@ abstract class BaseTrainerFragment : Fragment() {
         super.onDestroyView()
         audio?.release()
         audio = null
+    }
+
+    protected companion object {
+        const val MIN_CHOICES = 2
+        const val MAX_CHOICES = 8
+        const val CHOICES_PER_ROW = 4
     }
 }

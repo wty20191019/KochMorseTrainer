@@ -8,6 +8,7 @@ open class PageState {
     var charWpm = 20
     var effWpm = 10
     var freq = 600
+    var choiceCount = 4
 }
 
 /** 整串听认页额外持有的出题状态 */

@@ -43,46 +43,47 @@
             android:layout_marginBottom="12dp"
             android:minHeight="60dp" />
 
-        <!-- 候选按钮 -->
+        <!-- 候选数量 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center"
+            android:gravity="center_vertical"
+            android:background="#1E1E1E"
+            android:padding="12dp"
             android:layout_marginBottom="8dp">
 
-            <Button
-                android:id="@+id/btnChoice1"
-                android:layout_width="65dp"
-                android:layout_height="65dp"
-                android:text="-"
-                android:textSize="26sp"
-                android:layout_margin="6dp" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="候选数量"
+                android:textColor="#CCCCCC" />
 
-            <Button
-                android:id="@+id/btnChoice2"
-                android:layout_width="65dp"
-                android:layout_height="65dp"
-                android:text="-"
-                android:textSize="26sp"
-                android:layout_margin="6dp" />
+            <SeekBar
+                android:id="@+id/seekBarChoices"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:max="6"
+                android:progress="2" />
 
-            <Button
-                android:id="@+id/btnChoice3"
-                android:layout_width="65dp"
-                android:layout_height="65dp"
-                android:text="-"
-                android:textSize="26sp"
-                android:layout_margin="6dp" />
-
-            <Button
-                android:id="@+id/btnChoice4"
-                android:layout_width="65dp"
-                android:layout_height="65dp"
-                android:text="-"
-                android:textSize="26sp"
-                android:layout_margin="6dp" />
+            <TextView
+                android:id="@+id/tvChoicesValue"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:text="4"
+                android:textColor="#FFFFFF"
+                android:gravity="center" />
         </LinearLayout>
+
+        <!-- 候选按钮（按候选数量动态生成） -->
+        <LinearLayout
+            android:id="@+id/choiceContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="8dp" />
 
         <TextView
             android:id="@+id/tvResult"

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
 
@@ -17,7 +18,7 @@ class SequenceFragment : BaseTrainerFragment() {
     private lateinit var tvResult: TextView
     private lateinit var btnPlay: Button
     private lateinit var btnSubmit: Button
-    private lateinit var choiceButtons: Array<Button>
+    private lateinit var choiceContainer: LinearLayout
     private var isPlaying = false
 
     override fun onCreateView(
@@ -34,14 +35,10 @@ class SequenceFragment : BaseTrainerFragment() {
         tvResult = view.findViewById(R.id.tvResult)
         btnPlay = view.findViewById(R.id.btnPlay)
         btnSubmit = view.findViewById(R.id.btnSubmit)
-        choiceButtons = arrayOf(
-            view.findViewById(R.id.btnChoice1),
-            view.findViewById(R.id.btnChoice2),
-            view.findViewById(R.id.btnChoice3),
-            view.findViewById(R.id.btnChoice4)
-        )
+        choiceContainer = view.findViewById(R.id.choiceContainer)
 
         setupCharLength(view)
+        bindChoiceCount(view) { updateChoiceButtons() }
         setupButtons(view)
         updateChoiceButtons()
         restore()
@@ -96,16 +93,6 @@ class SequenceFragment : BaseTrainerFragment() {
             }
         }
 
-        for (button in choiceButtons) {
-            button.setOnClickListener {
-                if (state.answer.length < state.charLength) {
-                    state.answer.append(button.text)
-                    updateAnswerDisplay()
-                    btnSubmit.isEnabled = state.answer.isNotEmpty()
-                }
-            }
-        }
-
         root.findViewById<Button>(R.id.btnDelete).setOnClickListener {
             if (state.answer.isNotEmpty()) {
                 state.answer.deleteCharAt(state.answer.length - 1)
@@ -138,22 +125,18 @@ class SequenceFragment : BaseTrainerFragment() {
     }
 
     private fun updateChoiceButtons() {
-        val currentChars = koch.currentChars
-        if (currentChars.length <= 4) {
-            for (i in 0 until 4) {
-                if (i < currentChars.length) {
-                    choiceButtons[i].text = currentChars[i].toString()
-                    choiceButtons[i].isEnabled = true
-                } else {
-                    choiceButtons[i].text = "-"
-                    choiceButtons[i].isEnabled = false
-                }
-            }
+        val chars = koch.currentChars
+        val count = minOf(state.choiceCount, chars.length)
+        val labels = if (chars.length <= count) {
+            chars.map { it.toString() }
         } else {
-            val selected = currentChars.toList().shuffled().take(4)
-            for (i in 0 until 4) {
-                choiceButtons[i].text = selected[i].toString()
-                choiceButtons[i].isEnabled = true
+            chars.toList().shuffled().take(count).map { it.toString() }
+        }
+        renderChoiceButtons(choiceContainer, labels) { label ->
+            if (state.answer.length < state.charLength) {
+                state.answer.append(label)
+                updateAnswerDisplay()
+                btnSubmit.isEnabled = state.answer.isNotEmpty()
             }
         }
     }
