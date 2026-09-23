@@ -129,14 +129,13 @@ abstract class BaseTrainerFragment : Fragment() {
         })
     }
 
-    /** 按候选文本动态生成候选按钮（每行最多 CHOICES_PER_ROW 个） */
+    /** 按候选文本动态生成候选按钮（每行最多 CHOICES_PER_ROW 个，行与按钮均铺满可用空间） */
     protected fun renderChoiceButtons(
         container: LinearLayout,
         labels: List<String>,
         onClick: (String) -> Unit
     ) {
         container.removeAllViews()
-        val buttonHeight = (65 * resources.displayMetrics.density).toInt()
         var row: LinearLayout? = null
 
         labels.forEachIndexed { index, label ->
@@ -145,7 +144,8 @@ abstract class BaseTrainerFragment : Fragment() {
                     orientation = LinearLayout.HORIZONTAL
                     layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
+                        0,
+                        1f
                     )
                     gravity = Gravity.CENTER
                 }
@@ -155,7 +155,11 @@ abstract class BaseTrainerFragment : Fragment() {
             val button = Button(requireContext()).apply {
                 text = label
                 textSize = 26f
-                layoutParams = LinearLayout.LayoutParams(0, buttonHeight, 1f).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    1f
+                ).apply {
                     setMargins(6, 6, 6, 6)
                 }
                 setOnClickListener { onClick(label) }
