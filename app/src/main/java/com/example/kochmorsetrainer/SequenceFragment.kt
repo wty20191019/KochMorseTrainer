@@ -38,7 +38,6 @@ class SequenceFragment : BaseTrainerFragment() {
         choiceContainer = view.findViewById(R.id.choiceContainer)
 
         setupCharLength(view)
-        bindChoiceCount(view) { updateChoiceButtons() }
         setupButtons(view)
         updateChoiceButtons()
         restore()
@@ -125,13 +124,8 @@ class SequenceFragment : BaseTrainerFragment() {
     }
 
     private fun updateChoiceButtons() {
-        val chars = koch.currentChars
-        val count = minOf(state.choiceCount, chars.length)
-        val labels = if (chars.length <= count) {
-            chars.map { it.toString() }
-        } else {
-            chars.toList().shuffled().take(count).map { it.toString() }
-        }
+        // 候选固定为当前等级的全部字符
+        val labels = koch.currentChars.map { it.toString() }
         renderChoiceButtons(choiceContainer, labels) { label ->
             if (state.answer.length < state.charLength) {
                 state.answer.append(label)
