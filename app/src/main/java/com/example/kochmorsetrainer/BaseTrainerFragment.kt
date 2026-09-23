@@ -1,10 +1,7 @@
 package com.example.kochmorsetrainer
 
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import android.widget.SeekBar
-import android.widget.Spinner
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -33,22 +30,22 @@ abstract class BaseTrainerFragment : Fragment() {
     protected fun bindSettings(root: View) {
         koch.setLevel(state.level)
 
-        val spinner = root.findViewById<Spinner>(R.id.spinnerLevel)
-        val levels = (2..koch.maxLevel).toList()
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, levels)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner.adapter = adapter
-        spinner.setSelection(state.level - 2)
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                state.level = position + 2
+        val seekLevel = root.findViewById<SeekBar>(R.id.seekBarLevel)
+        val tvLevel = root.findViewById<TextView>(R.id.tvLevelValue)
+        seekLevel.max = koch.maxLevel - 2
+        seekLevel.progress = state.level - 2
+        tvLevel.text = state.level.toString()
+        seekLevel.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                state.level = progress + 2
+                tvLevel.text = state.level.toString()
                 koch.setLevel(state.level)
                 updateCharsDisplay(root)
-                onLevelChanged()
             }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) = onLevelChanged()
+        })
 
         val tvChar = root.findViewById<TextView>(R.id.tvCharSpeedValue)
         val tvEff = root.findViewById<TextView>(R.id.tvEffSpeedValue)
