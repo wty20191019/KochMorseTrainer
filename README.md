@@ -101,12 +101,25 @@ Windows 下使用 `gradlew.bat` 代替 `./gradlew`。
 
 ## 生成 Release
 
+项目通过项目根目录的 `keystore.properties`（已被 `.gitignore` 忽略，切勿提交）读取签名信息：
+
+```properties
+storeFile=koch-release.jks
+storePassword=******
+keyAlias=koch
+keyPassword=******
+```
+
+配置后执行：
+
 ```bash
 ./gradlew assembleRelease
 ```
 
-产物位于 `app/build/outputs/apk/release/`，为未签名的 `app-release-unsigned.apk`。
-如需安装或分发，请自行使用 `apksigner` 签名。
+产物位于 `app/build/outputs/apk/release/`：
+
+- 已配置签名时生成可直接安装/分发的 `app-release.apk`
+- 未配置签名时生成未签名的 `app-release-unsigned.apk`（需自行用 `apksigner` 签名）
 
 ## 许可
 
