@@ -1,19 +1,301 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:background="#121212">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="16dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Koch 摩尔斯训练"
+            android:textSize="22sp"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- 等级选择 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="等级:"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"/>
+
+            <Spinner
+                android:id="@+id/spinnerLevel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="#333333"/>
+
+            <TextView
+                android:id="@+id/tvCurrentChars"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" K M"
+                android:textColor="#00FF00"
+                android:textSize="14sp"
+                android:layout_marginStart="16dp"/>
+        </LinearLayout>
+
+        <!-- 设置区域 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#1E1E1E"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <!-- 字符数量 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="字符数量"
+                    android:textColor="#CCCCCC"/>
+
+                <SeekBar
+                    android:id="@+id/seekBarLength"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:max="7"
+                    android:progress="2"/>
+
+                <TextView
+                    android:id="@+id/tvLengthValue"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:text="5"
+                    android:textColor="#FFFFFF"
+                    android:gravity="center"/>
+            </LinearLayout>
+
+            <!-- 字符速度 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="字符速度"
+                    android:textColor="#CCCCCC"/>
+
+                <SeekBar
+                    android:id="@+id/seekBarCharSpeed"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:max="45"
+                    android:progress="15"/>
+
+                <TextView
+                    android:id="@+id/tvCharSpeedValue"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:text="20"
+                    android:textColor="#FFFFFF"
+                    android:gravity="center"/>
+            </LinearLayout>
+
+            <!-- 有效速度 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="有效速度"
+                    android:textColor="#CCCCCC"/>
+
+                <SeekBar
+                    android:id="@+id/seekBarEffSpeed"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:max="35"
+                    android:progress="5"/>
+
+                <TextView
+                    android:id="@+id/tvEffSpeedValue"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:text="10"
+                    android:textColor="#FFFFFF"
+                    android:gravity="center"/>
+            </LinearLayout>
+
+            <!-- 音调 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="音调 (Hz)"
+                    android:textColor="#CCCCCC"/>
+
+                <SeekBar
+                    android:id="@+id/seekBarFreq"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:max="1400"
+                    android:progress="200"/>
+
+                <TextView
+                    android:id="@+id/tvFreqValue"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:text="600"
+                    android:textColor="#FFFFFF"
+                    android:gravity="center"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 播放控制 -->
+        <Button
+            android:id="@+id/btnPlay"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="播放摩尔斯码"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- 答案显示 -->
+        <TextView
+            android:id="@+id/tvAnswer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="32sp"
+            android:textColor="#FFFFFF"
+            android:gravity="center"
+            android:background="#333333"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:minHeight="60dp"/>
+
+        <!-- 候选按钮 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/btnChoice1"
+                android:layout_width="65dp"
+                android:layout_height="65dp"
+                android:text="K"
+                android:textSize="26sp"
+                android:layout_margin="6dp"/>
+
+            <Button
+                android:id="@+id/btnChoice2"
+                android:layout_width="65dp"
+                android:layout_height="65dp"
+                android:text="M"
+                android:textSize="26sp"
+                android:layout_margin="6dp"/>
+
+            <Button
+                android:id="@+id/btnChoice3"
+                android:layout_width="65dp"
+                android:layout_height="65dp"
+                android:text="U"
+                android:textSize="26sp"
+                android:layout_margin="6dp"/>
+
+            <Button
+                android:id="@+id/btnChoice4"
+                android:layout_width="65dp"
+                android:layout_height="65dp"
+                android:text="R"
+                android:textSize="26sp"
+                android:layout_margin="6dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="12dp">
+
+            <Button
+                android:id="@+id/btnDelete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="← 删除"
+                android:layout_margin="6dp"/>
+
+            <Button
+                android:id="@+id/btnSubmit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="提交答案"
+                android:enabled="false"
+                android:layout_margin="6dp"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvResult"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="18sp"
+            android:textColor="#FF0000"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- 单字符听认区域 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="单字符听认（点击字母试听）"
+            android:textColor="#888888"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- 改成 LinearLayout，避免 GridLayout 崩溃 -->
+        <LinearLayout
+            android:id="@+id/gridChars"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="16dp"/>
+
+    </LinearLayout>
+</ScrollView>
