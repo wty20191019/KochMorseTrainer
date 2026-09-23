@@ -1,17 +1,25 @@
 package com.example.kochmorsetrainer
 
+import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioTrack
-import android.media.AudioFormat
 import android.os.Handler
 import android.os.Looper
+import kotlin.math.PI
 import kotlin.math.sin
 
+/**
+ * 摩尔斯音频引擎。
+ *
+ * 将整段文本一次性合成为单个 PCM 缓冲（含点划间的静音与每个音调的淡入淡出包络），
+ * 再用一个 AudioTrack 播放。相比“每个音调新建一个 AudioTrack”的旧做法，这样：
+ * 1. 时间间隔由采样点精确控制，杜绝因主线程 Handler 抖动导致的时长不稳；
+ * 2. 每个音调首尾加入淡入淡出包络，避免波形突然起止产生的“咔哒”爆音。
+ */
 class MorseAudioGenerator {
 
     private val handler = Handler(Looper.getMainLooper())
     private var audioTrack: AudioTrack? = null
-    private var isPlaying = false
 
     private val morseMap = mapOf(
         'A' to ".-",    'B' to "-...",  'C' to "-.-.",  'D' to "-..",
@@ -40,93 +48,22 @@ class MorseAudioGenerator {
 
     fun playText(text: String, onFinished: () -> Unit) {
         stop()
-        isPlaying = true
-
-        val charUnit = 1200L / charWpm
-        val effUnit = 1200L / effectiveWpm
-        var currentTime = 0L
-
-        for (char in text.uppercase()) {
-            if (char == ' ') {
-                currentTime += effUnit * 4
-                continue
-            }
-
-            val code = morseMap[char] ?: continue
-
-            for (symbol in code) {
-                val duration = if (symbol == '.') charUnit else charUnit * 3
-                scheduleTone(duration, currentTime)
-                currentTime += duration + charUnit
-            }
-            currentTime += charUnit * 2
-        }
-
-        handler.postDelayed({
-            isPlaying = false
+        val samples = buildSignal(text)
+        if (samples.isEmpty()) {
             onFinished()
-        }, currentTime)
+            return
+        }
+        playBuffer(samples, onFinished)
     }
 
     fun playSingleChar(char: Char) {
         stop()
-        isPlaying = true
-
-        val code = morseMap[char.uppercaseChar()] ?: return
-        val charUnit = 1200L / charWpm
-        var currentTime = 0L
-
-        for (symbol in code) {
-            val duration = if (symbol == '.') charUnit else charUnit * 3
-            scheduleTone(duration, currentTime)
-            currentTime += duration + charUnit
-        }
-
-        handler.postDelayed({
-            isPlaying = false
-        }, currentTime)
-    }
-
-    private fun scheduleTone(durationMs: Long, delayMs: Long) {
-        val numSamples = (durationMs * sampleRate / 1000).toInt()
-        if (numSamples <= 0) return
-
-        val samples = DoubleArray(numSamples)
-        val generated = ByteArray(2 * numSamples)
-
-        for (i in 0 until numSamples) {
-            samples[i] = sin(2.0 * Math.PI * i / (sampleRate / frequency))
-            val val16 = (samples[i] * 32767).toInt().toShort()
-            generated[2 * i] = (val16.toInt() and 0x00FF).toByte()
-            generated[2 * i + 1] = (val16.toInt() shr 8).toByte()
-        }
-
-        handler.postDelayed({
-            if (!isPlaying) return@postDelayed
-
-            try {
-                // 先释放旧的
-                audioTrack?.stop()
-                audioTrack?.release()
-
-                audioTrack = AudioTrack(
-                    AudioManager.STREAM_MUSIC,
-                    sampleRate,
-                    AudioFormat.CHANNEL_OUT_MONO,
-                    AudioFormat.ENCODING_PCM_16BIT,
-                    generated.size,
-                    AudioTrack.MODE_STATIC
-                )
-                audioTrack?.write(generated, 0, generated.size)
-                audioTrack?.play()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }, delayMs)
+        val samples = buildSignal(char.toString())
+        if (samples.isEmpty()) return
+        playBuffer(samples, null)
     }
 
     fun stop() {
-        isPlaying = false
         handler.removeCallbacksAndMessages(null)
         try {
             audioTrack?.stop()
@@ -139,5 +76,103 @@ class MorseAudioGenerator {
 
     fun release() {
         stop()
+    }
+
+    // ===== 合成 =====
+
+    private fun msToSamples(ms: Double): Int = (ms * sampleRate / 1000.0).toInt()
+
+    private fun totalDurationMs(text: String, charUnit: Double, effUnit: Double): Double {
+        var total = 0.0
+        for (char in text.uppercase()) {
+            if (char == ' ') {
+                total += effUnit * 4
+                continue
+            }
+            val code = morseMap[char] ?: continue
+            for (symbol in code) {
+                total += if (symbol == '.') charUnit else charUnit * 3
+                total += charUnit
+            }
+            total += charUnit * 2
+        }
+        return total
+    }
+
+    private fun buildSignal(text: String): ShortArray {
+        val charUnit = 1200.0 / charWpm
+        val effUnit = 1200.0 / effectiveWpm
+        val totalSamples = msToSamples(totalDurationMs(text, charUnit, effUnit))
+        if (totalSamples <= 0) return ShortArray(0)
+
+        val samples = ShortArray(totalSamples)
+        val cycleSamples = sampleRate / frequency
+        var pos = 0
+
+        for (char in text.uppercase()) {
+            if (char == ' ') {
+                pos += msToSamples(effUnit * 4)
+                continue
+            }
+            val code = morseMap[char] ?: continue
+            for (symbol in code) {
+                val durationMs = if (symbol == '.') charUnit else charUnit * 3
+                pos = addTone(samples, pos, msToSamples(durationMs), cycleSamples)
+                pos += msToSamples(charUnit)
+            }
+            pos += msToSamples(charUnit * 2)
+        }
+        return samples
+    }
+
+    /** 在 samples 的 [start] 处写入一段带淡入淡出的正弦音，返回下一个写入位置 */
+    private fun addTone(samples: ShortArray, start: Int, length: Int, cycleSamples: Double): Int {
+        val fade = minOf(length / 3, msToSamples(FADE_MS))
+        val end = start + length
+        for (i in 0 until length) {
+            var amplitude = 1.0
+            if (fade > 0) {
+                if (i < fade) {
+                    amplitude = i.toDouble() / fade
+                } else if (i >= length - fade) {
+                    amplitude = (length - i).toDouble() / fade
+                }
+            }
+            val value = sin(2.0 * PI * i / cycleSamples) * amplitude * GAIN
+            samples[start + i] = (value * Short.MAX_VALUE).toInt().toShort()
+        }
+        return end
+    }
+
+    // ===== 播放 =====
+
+    private fun playBuffer(samples: ShortArray, onFinished: (() -> Unit)?) {
+        try {
+            audioTrack?.release()
+            audioTrack = AudioTrack(
+                AudioManager.STREAM_MUSIC,
+                sampleRate,
+                AudioFormat.CHANNEL_OUT_MONO,
+                AudioFormat.ENCODING_PCM_16BIT,
+                samples.size * 2,
+                AudioTrack.MODE_STATIC
+            )
+            audioTrack?.write(samples, 0, samples.size)
+            audioTrack?.play()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            onFinished?.invoke()
+            return
+        }
+
+        val durationMs = samples.size.toLong() * 1000 / sampleRate
+        handler.postDelayed({
+            onFinished?.invoke()
+        }, durationMs)
+    }
+
+    private companion object {
+        const val FADE_MS = 4.0
+        const val GAIN = 0.95
     }
 }
